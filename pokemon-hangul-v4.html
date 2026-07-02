@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>포켓몬 한글 도감</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&display=swap');
+:root{
+  --bg:#09091a;--panel:#111128;--border:#22224a;--yellow:#FFD700;
+  --white:#eff0ff;--gray:#6a6a99;--card:#14143a;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);font-family:'Nanum Gothic',sans-serif;min-height:100vh;color:var(--white)}
+.screen{display:none;min-height:100vh}.screen.active{display:block}
+
+/* ═══ MAIN ═══ */
+.main-top{text-align:center;padding:32px 20px 16px}
+.main-top h1{font-family:'Jua',sans-serif;font-size:2rem;color:var(--yellow);text-shadow:0 0 28px rgba(255,215,0,.5);letter-spacing:2px}
+.main-top p{color:var(--gray);font-size:.82rem;margin-top:4px}
+.score-bar{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:12px;flex-wrap:wrap}
+.score-chip{background:rgba(255,215,0,.1);border:1.5px solid rgba(255,215,0,.3);border-radius:50px;padding:6px 18px;font-family:'Jua',sans-serif;font-size:.95rem;color:var(--yellow)}
+.total-pct{font-size:.8rem;color:var(--gray)}
+.total-pbar{width:200px;height:6px;background:#1a1a3a;border-radius:10px;overflow:hidden;margin:0 auto 4px}
+.total-pbar-fill{height:100%;background:linear-gradient(90deg,var(--yellow),#2ec4b6);border-radius:10px;transition:width .6s}
+
+.series-wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;padding:12px 14px;max-width:600px;margin:0 auto}
+.s-card{background:var(--card);border:2px solid var(--border);border-radius:18px;padding:16px 10px 12px;cursor:pointer;transition:transform .18s,box-shadow .18s;text-align:center;position:relative;overflow:hidden}
+.s-card::before{content:attr(data-icon);position:absolute;right:-4px;bottom:-8px;font-size:48px;opacity:.07;pointer-events:none}
+.s-card:hover{transform:translateY(-4px);box-shadow:0 8px 26px rgba(0,0,0,.45)}
+.s-icon{font-size:2rem;display:block;margin-bottom:6px}
+.s-name{font-family:'Jua',sans-serif;font-size:.88rem;margin-bottom:2px}
+.s-sub{font-size:.65rem;color:var(--gray);margin-bottom:8px}
+.s-bar-wrap{height:4px;background:#1a1a3a;border-radius:10px;overflow:hidden;margin-bottom:3px}
+.s-bar{height:100%;border-radius:10px;transition:width .5s}
+.s-count{font-size:.62rem;color:var(--gray)}
+.badge-row{display:flex;justify-content:center;margin-top:6px;gap:3px}
+.s-badge{font-size:.9rem}
+
+.bottom-nav{display:flex;gap:10px;padding:4px 14px 28px;max-width:600px;margin:0 auto}
+.b-btn{flex:1;background:var(--panel);border:2px solid var(--border);color:var(--gray);font-family:'Jua',sans-serif;font-size:.88rem;padding:12px;border-radius:14px;cursor:pointer;transition:all .15s}
+.b-btn:hover{color:var(--white);border-color:#445}
+.b-btn.gold{background:rgba(255,215,0,.08);border-color:rgba(255,215,0,.35);color:var(--yellow)}
+
+/* ═══ TOP BAR ═══ */
+.top-bar{display:flex;align-items:center;gap:10px;padding:16px 14px 10px;max-width:640px;margin:0 auto}
+.back-btn{background:var(--panel);border:2px solid var(--border);color:var(--gray);font-family:'Jua',sans-serif;font-size:.82rem;padding:7px 13px;border-radius:10px;cursor:pointer;flex-shrink:0}
+.back-btn:hover{color:var(--white)}
+.top-bar h2{font-family:'Jua',sans-serif;font-size:1.2rem}
+
+/* ═══ DEX ═══ */
+#dexScreen{padding-bottom:40px}
+.dex-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;padding:0 14px;max-width:620px;margin:0 auto}
+.dex-item{background:var(--card);border:2px solid var(--border);border-radius:13px;padding:9px 5px;text-align:center}
+.dex-item.done{border-color:rgba(46,196,182,.5)}
+.dex-img{width:54px;height:54px;object-fit:contain;display:block;margin:0 auto 4px}
+.dex-img.shadow{filter:brightness(0) opacity(.18)}
+.dex-name{font-size:.68rem;font-family:'Jua',sans-serif}
+.dex-item.done .dex-name{color:#2ec4b6}
+.dex-item:not(.done) .dex-name{color:#333}
+.dex-num{font-size:.58rem;color:#383858;margin-bottom:2px}
+
+/* ═══ LEARN ═══ */
+#learnScreen{padding-bottom:40px}
+.learn-hud{display:flex;align-items:center;gap:8px;background:var(--panel);border:1.5px solid var(--border);border-radius:13px;padding:9px 14px;margin:8px 14px;max-width:612px;margin-left:auto;margin-right:auto}
+.hud-dots{display:flex;gap:4px;flex:1;flex-wrap:wrap}
+.hud-dot{width:21px;height:21px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;background:var(--bg);transition:all .3s;flex-shrink:0}
+.hud-dot.done{border-color:#2ec4b6;background:rgba(46,196,182,.15)}
+.hud-dot.cur{border-color:var(--yellow);background:rgba(255,215,0,.15);box-shadow:0 0 8px rgba(255,215,0,.3)}
+.hud-score{font-family:'Jua',sans-serif;font-size:1.1rem;color:var(--yellow);white-space:nowrap}
+.hud-sound{background:none;border:none;font-size:1.3rem;cursor:pointer;padding:0 2px}
+
+.learn-card{background:var(--card);border:2px solid var(--border);border-radius:22px;overflow:hidden;margin:0 14px 12px;max-width:612px;margin-left:auto;margin-right:auto;animation:cardIn .3s ease}
+@keyframes cardIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* 포켓몬 히어로 */
+.poke-hero{display:flex;flex-direction:column;align-items:center;padding:24px 20px 18px;background:linear-gradient(160deg,#111130 0%,#09091a 100%);border-bottom:1.5px solid var(--border);position:relative;overflow:hidden}
+.poke-hero::before{content:attr(data-bg);position:absolute;font-size:110px;opacity:.05;right:-8px;top:-8px;pointer-events:none}
+.type-tag{font-size:.7rem;font-weight:800;padding:3px 14px;border-radius:20px;letter-spacing:1px;margin-bottom:12px}
+.poke-img-ring{width:140px;height:140px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:14px}
+.poke-img-ring::before{content:'';position:absolute;inset:0;border-radius:50%;border:3px solid transparent;background:linear-gradient(var(--bg),var(--bg)) padding-box,conic-gradient(from 0deg,var(--tc,#FFD700),transparent 60%,var(--tc,#FFD700)) border-box;animation:ringspin 4s linear infinite}
+@keyframes ringspin{to{transform:rotate(360deg)}}
+.poke-img{width:120px;height:120px;object-fit:contain;filter:drop-shadow(0 6px 16px rgba(0,0,0,.5));animation:float 3s ease-in-out infinite;position:relative;z-index:1}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.load-ico{width:120px;height:120px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;animation:ringspin 1s linear infinite}
+.poke-name-big{font-family:'Jua',sans-serif;font-size:2.2rem;line-height:1}
+.poke-num-sm{font-size:.68rem;color:var(--gray);letter-spacing:2px;margin-top:3px}
+.cry-btn{margin-top:10px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);border-radius:50px;padding:6px 18px;color:var(--white);font-family:'Jua',sans-serif;font-size:.82rem;cursor:pointer;transition:all .2s}
+.cry-btn:hover{background:rgba(255,255,255,.14)}
+
+/* 본문 */
+.poke-body{padding:16px 20px}
+.sec-lbl{font-size:.68rem;color:var(--gray);letter-spacing:2px;text-transform:uppercase;margin-bottom:7px}
+.desc-box{background:rgba(255,255,255,.04);border-left:3px solid rgba(255,255,255,.1);border-radius:8px;padding:11px 13px;font-size:.83rem;color:#bbbdd0;line-height:1.7;margin-bottom:16px}
+
+/* 진화 체인 */
+.evo-chain{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:12px;background:rgba(255,255,255,.03);border:1.5px solid var(--border);border-radius:13px;margin-bottom:16px}
+.evo-mon{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;min-width:54px}
+.evo-img{width:50px;height:50px;object-fit:contain}
+.evo-name{font-family:'Jua',sans-serif;font-size:.7rem;text-align:center}
+.evo-cur{color:var(--yellow)}
+.evo-lbl{font-size:.55rem;color:var(--gray);text-align:center}
+.evo-arr{font-size:1.1rem;color:var(--gray);flex-shrink:0}
+
+/* 글씨 쓰기 */
+.writing-sec{padding:0 20px 20px}
+.writing-title{font-family:'Jua',sans-serif;font-size:.92rem;margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.writing-title span{background:var(--yellow);color:#000;font-size:.62rem;padding:2px 9px;border-radius:20px}
+.guide-toggle{background:rgba(79,195,247,.1);border:1.5px solid rgba(79,195,247,.3);color:#4fc3f7;font-size:.65rem;padding:2px 9px;border-radius:20px;cursor:pointer;font-family:'Jua',sans-serif}
+.guide-toggle.on{background:rgba(79,195,247,.25);border-color:#4fc3f7}
+.writing-area{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:11px}
+.char-box{display:flex;flex-direction:column;align-items:center;gap:4px}
+.guide-ch{font-family:'Jua',sans-serif;font-size:1.1rem;height:22px;display:flex;align-items:center;opacity:.4}
+.cv-wrap{position:relative;border:2px solid #22224a;border-radius:10px;overflow:hidden;background:#f7f7ee;cursor:crosshair}
+.cv-wrap.active{box-shadow:0 0 10px rgba(255,215,0,.3)}
+.cv-wrap canvas{display:block;touch-action:none;position:relative;z-index:3}
+.cv-wrap svg{position:absolute;inset:0;pointer-events:none}
+.cv-guide-layer{position:absolute;inset:0;z-index:2;pointer-events:none}
+.clr-ch{background:rgba(255,255,255,.06);border:1px solid #22224a;color:var(--gray);font-size:.62rem;padding:2px 6px;border-radius:7px;cursor:pointer;font-family:'Nanum Gothic',sans-serif}
+.clr-ch:hover{color:var(--white)}
+
+.tools{display:flex;gap:7px;align-items:center;margin-bottom:11px;flex-wrap:wrap}
+.tl{font-size:.72rem;color:var(--gray)}
+.pen-btns{display:flex;gap:4px}
+.pb{width:27px;height:27px;border-radius:50%;background:var(--panel);border:2px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.pb.active{border-color:var(--yellow);background:rgba(255,215,0,.1)}
+.dot{background:#333;border-radius:50%}
+.ds{width:5px;height:5px}.dm{width:9px;height:9px}.dl{width:13px;height:13px}
+.all-clr{margin-left:auto;background:rgba(230,57,70,.08);border:1.5px solid rgba(230,57,70,.22);color:#e63946;font-size:.72rem;padding:4px 11px;border-radius:9px;cursor:pointer;font-family:'Nanum Gothic',sans-serif;font-weight:700}
+
+.action-row{display:flex;gap:9px}
+.btn-done{flex:1;background:linear-gradient(135deg,var(--yellow),#ff9f1c);color:#000;font-family:'Jua',sans-serif;font-size:.95rem;border:none;padding:14px;border-radius:13px;cursor:pointer;box-shadow:0 4px 14px rgba(255,215,0,.28);transition:all .2s;letter-spacing:1px}
+.btn-done:hover{transform:translateY(-2px)}
+.btn-done:active{transform:scale(.97)}
+
+/* ═══ 기술 애니메이션 오버레이 ═══ */
+.skill-overlay{position:fixed;inset:0;z-index:500;pointer-events:none;display:flex;align-items:center;justify-content:center}
+.skill-anim{position:relative;text-align:center;transform:scale(0);transition:transform .3s ease}
+.skill-anim.show{transform:scale(1)}
+.skill-flash{position:fixed;inset:0;opacity:0;pointer-events:none;transition:opacity .15s;z-index:499}
+.skill-flash.show{opacity:1}
+.skill-emoji{font-size:5rem;animation:skillBounce .6s ease infinite alternate}
+@keyframes skillBounce{from{transform:scale(1) rotate(-5deg)}to{transform:scale(1.2) rotate(5deg)}}
+.skill-name{font-family:'Jua',sans-serif;font-size:1.6rem;color:white;text-shadow:0 0 20px rgba(255,255,255,.8);margin-top:8px}
+.skill-pts{font-family:'Jua',sans-serif;font-size:1.1rem;color:var(--yellow);margin-top:4px}
+.particles{position:absolute;inset:0;pointer-events:none}
+
+/* ═══ 카드 화면 ═══ */
+#cardScreen{padding-bottom:40px}
+.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding:0 14px;max-width:620px;margin:0 auto}
+.poke-card{background:linear-gradient(135deg,#1a1a3a,#0e0e22);border:2px solid var(--border);border-radius:20px;overflow:hidden;position:relative}
+.card-top{padding:16px;text-align:center;position:relative}
+.card-poke-img{width:80px;height:80px;object-fit:contain;display:block;margin:0 auto}
+.card-name{font-family:'Jua',sans-serif;font-size:1.1rem;margin:6px 0 2px}
+.card-num{font-size:.65rem;color:var(--gray)}
+.card-type-badge{font-size:.65rem;font-weight:800;padding:2px 10px;border-radius:20px;display:inline-block;margin-top:4px}
+.card-divider{height:1px;background:var(--border);margin:0 14px}
+.card-writings{padding:12px 14px;display:flex;flex-wrap:wrap;gap:5px;justify-content:center;min-height:60px;align-items:center}
+.card-cv{background:#f7f7ee;border-radius:6px;overflow:hidden;border:1px solid #ddd}
+.card-cv img{display:block;width:46px;height:46px;object-fit:contain}
+.card-empty{color:#333;font-size:.75rem;font-family:'Jua',sans-serif}
+
+/* ═══ SHEET ═══ */
+#sheetScreen{padding-bottom:40px}
+.sheet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:11px;padding:0 14px;max-width:660px;margin:0 auto}
+.sh-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:11px;text-align:center}
+.sh-img{width:52px;height:52px;object-fit:contain;margin:0 auto 5px;display:block}
+.sh-name{font-family:'Jua',sans-serif;font-size:.78rem;color:var(--yellow);margin-bottom:6px}
+.sh-cvs{display:flex;gap:3px;justify-content:center;flex-wrap:wrap}
+.sh-cv{background:#f7f7ee;border-radius:5px;overflow:hidden;border:1px solid #ddd}
+
+/* ═══ BADGE SCREEN ═══ */
+#badgeScreen{padding-bottom:40px}
+.badge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0 14px;max-width:600px;margin:0 auto}
+.badge-item{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:18px 10px;text-align:center;transition:all .2s}
+.badge-item.earned{border-color:rgba(255,215,0,.5);background:rgba(255,215,0,.05)}
+.badge-icon{font-size:2.4rem;margin-bottom:8px;display:block;filter:grayscale(1) opacity(.3)}
+.badge-item.earned .badge-icon{filter:none}
+.badge-name{font-family:'Jua',sans-serif;font-size:.85rem;margin-bottom:3px}
+.badge-item:not(.earned) .badge-name{color:#444}
+.badge-desc{font-size:.65rem;color:var(--gray)}
+.badge-earned-lbl{font-size:.62rem;color:var(--yellow);margin-top:5px;font-family:'Jua',sans-serif}
+
+/* ═══ OVERLAYS ═══ */
+.praise-pop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:var(--card);border:2px solid var(--yellow);border-radius:18px;padding:16px 26px;text-align:center;z-index:600;transition:transform .28s;box-shadow:0 0 40px rgba(255,215,0,.25);pointer-events:none}
+.praise-pop.show{transform:translate(-50%,-50%) scale(1)}
+.pp-e{font-size:2rem}.pp-t{font-family:'Jua',sans-serif;font-size:1.1rem;color:var(--yellow);margin-top:4px}
+.warn-pop{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(80px);background:#c1121f;color:#fff;font-family:'Jua',sans-serif;font-size:.88rem;padding:10px 24px;border-radius:50px;z-index:700;transition:transform .28s;white-space:nowrap;box-shadow:0 4px 16px rgba(193,18,31,.4)}
+.warn-pop.show{transform:translateX(-50%) translateY(0)}
+.result-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:400;align-items:center;justify-content:center;padding:20px}
+.result-overlay.show{display:flex}
+.result-box{background:var(--card);border:2px solid var(--yellow);border-radius:24px;padding:28px 22px;text-align:center;max-width:360px;width:100%;animation:pop .38s ease;box-shadow:0 0 50px rgba(255,215,0,.18)}
+@keyframes pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+.rb-e{font-size:3rem;margin-bottom:8px}.rb-tt{font-family:'Jua',sans-serif;font-size:1.5rem;color:var(--yellow);margin-bottom:3px}
+.rb-s{color:var(--gray);font-size:.82rem;margin-bottom:12px}.rb-sc{font-family:'Jua',sans-serif;font-size:2.4rem;color:#2ec4b6;margin-bottom:16px}
+.rb-badge{background:rgba(255,215,0,.1);border:2px solid var(--yellow);border-radius:14px;padding:12px;margin-bottom:16px;display:none}
+.rb-badge.show{display:block}
+.rb-badge-ico{font-size:2.2rem}.rb-badge-txt{font-family:'Jua',sans-serif;font-size:.88rem;color:var(--yellow);margin-top:4px}
+.rb-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:16px}
+.rb-item{background:var(--panel);border-radius:8px;padding:5px 2px;font-size:.6rem;color:var(--gray);text-align:center}
+.rb-item img{width:36px;height:36px;object-fit:contain;display:block;margin:0 auto 2px}
+.rb-btns{display:flex;gap:8px}
+.rb-btn{flex:1;font-family:'Jua',sans-serif;font-size:.88rem;border:none;padding:11px;border-radius:12px;cursor:pointer;transition:all .18s}
+.rb-btn.p{background:linear-gradient(135deg,var(--yellow),#ff9f1c);color:#000}
+.rb-btn.s{background:var(--panel);border:2px solid var(--border);color:var(--gray)}
+.rb-btn:hover{transform:translateY(-2px)}
+
+/* 새 뱃지 획득 팝업 */
+.badge-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,#1a1a3a,#0e0e22);border:3px solid var(--yellow);border-radius:24px;padding:28px;text-align:center;z-index:800;transition:transform .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 0 60px rgba(255,215,0,.4);pointer-events:none;min-width:240px}
+.badge-popup.show{transform:translate(-50%,-50%) scale(1)}
+.bp-label{font-size:.72rem;color:var(--gray);letter-spacing:2px;margin-bottom:8px}
+.bp-icon{font-size:4rem;margin-bottom:8px;animation:badgePulse 1s ease infinite alternate}
+@keyframes badgePulse{from{transform:scale(1)}to{transform:scale(1.12)}}
+.bp-name{font-family:'Jua',sans-serif;font-size:1.3rem;color:var(--yellow)}
+.bp-desc{font-size:.78rem;color:var(--gray);margin-top:4px}
+</style>
+</head>
+<body>
+
+<!-- ══ MAIN ══ -->
+<div id="mainScreen" class="screen active">
+  <div class="main-top">
+    <h1>🎮 포켓몬 한글 도감</h1>
+    <p>타입을 골라서 이름을 배워봐요!</p>
+    <div class="score-bar">
+      <div class="score-chip">⭐ <span id="totalScoreDisp">0</span>점</div>
+    </div>
+    <div class="total-pbar" style="margin-top:10px"><div class="total-pbar-fill" id="totalPbar" style="width:0%"></div></div>
+    <div class="total-pct" id="totalPct">전체 0 / 110마리 수집</div>
+  </div>
+  <div class="series-wrap" id="seriesGrid"></div>
+  <div class="bottom-nav">
+    <button class="b-btn gold" onclick="showDex()">📖 도감</button>
+    <button class="b-btn" onclick="showScreen('cardScreen');buildCards()">📇 카드</button>
+    <button class="b-btn" onclick="showScreen('sheetScreen');buildSheet()">✏️ 글씨</button>
+    <button class="b-btn" onclick="showScreen('badgeScreen');buildBadges()">🏆 뱃지</button>
+  </div>
+</div>
+
+<!-- ══ DEX ══ -->
+<div id="dexScreen" class="screen">
+  <div class="top-bar"><button class="back-btn" onclick="showMain()">← 뒤로</button><h2 id="dexTitle">📖 전체 도감</h2></div>
+  <div class="dex-grid" id="dexGrid"></div>
+</div>
+
+<!-- ══ LEARN ══ -->
+<div id="learnScreen" class="screen">
+  <div class="top-bar"><button class="back-btn" onclick="showMain()">← 뒤로</button><h2 id="learnTitle" style="font-family:'Jua',sans-serif;font-size:1.1rem"></h2></div>
+  <div class="learn-hud">
+    <div class="hud-dots" id="hudDots"></div>
+    <div class="hud-score">⭐<span id="scoreDisp">0</span></div>
+  </div>
+  <div class="learn-card" id="learnCard">
+    <div class="poke-hero" id="pokeHero" data-bg="⚡">
+      <div class="type-tag" id="typeTag">⚡ 전기</div>
+      <div class="poke-img-ring" id="imgRing" style="--tc:#FFD700">
+        <div class="load-ico" id="loadIco">⚡</div>
+        <img id="pokeImg" class="poke-img" style="display:none" alt="">
+      </div>
+      <div class="poke-name-big" id="pokeName">...</div>
+      <div class="poke-num-sm" id="pokeNum">#000</div>
+      <button class="cry-btn" id="cryBtn" onclick="playCry()">🔊 울음소리 듣기</button>
+    </div>
+    <div class="poke-body">
+      <div class="sec-lbl">📋 도감 설명</div>
+      <div class="desc-box" id="pokeDesc">...</div>
+      <div class="sec-lbl">🔄 진화 단계</div>
+      <div class="evo-chain" id="evoChain"></div>
+    </div>
+    <div class="writing-sec">
+      <div class="writing-title">
+        ✏️ 이름을 써봐요!
+        <span>손가락으로 쓰세요</span>
+        <button class="guide-toggle" id="guideToggle" onclick="toggleGuide()">점선 가이드 OFF</button>
+      </div>
+      <div class="writing-area" id="writingArea"></div>
+      <div class="tools">
+        <span class="tl">굵기</span>
+        <div class="pen-btns">
+          <button class="pb" onclick="setPen(4,this)"><div class="dot ds"></div></button>
+          <button class="pb active" onclick="setPen(8,this)"><div class="dot dm"></div></button>
+          <button class="pb" onclick="setPen(14,this)"><div class="dot dl"></div></button>
+        </div>
+        <button class="all-clr" onclick="clearAll()">🗑️ 전체 지우기</button>
+      </div>
+      <div class="action-row">
+        <button class="btn-done" onclick="markDone()">✅ 다 썼어요!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CARD ══ -->
+<div id="cardScreen" class="screen">
+  <div class="top-bar"><button class="back-btn" onclick="showMain()">← 뒤로</button><h2 style="font-family:'Jua',sans-serif;color:var(--yellow)">📇 내 포켓몬 카드</h2></div>
+  <div class="card-grid" id="cardGrid"></div>
+</div>
+
+<!-- ══ SHEET ══ -->
+<div id="sheetScreen" class="screen">
+  <div class="top-bar"><button class="back-btn" onclick="showMain()">← 뒤로</button><h2 style="font-family:'Jua',sans-serif;color:var(--yellow)">✏️ 내 글씨 모음</h2></div>
+  <div class="sheet-grid" id="sheetGrid"></div>
+</div>
+
+<!-- ══ BADGE ══ -->
+<div id="badgeScreen" class="screen">
+  <div class="top-bar"><button class="back-btn" onclick="showMain()">← 뒤로</button><h2 style="font-family:'Jua',sans-serif;color:var(--yellow)">🏆 내 뱃지 컬렉션</h2></div>
+  <div class="badge-grid" id="badgeGrid"></div>
+</div>
+
+<!-- 기술 애니메이션 -->
+<div class="skill-overlay" id="skillOverlay">
+  <div class="skill-anim" id="skillAnim">
+    <div class="skill-emoji" id="skillEmoji">⚡</div>
+    <div class="skill-name" id="skillName">10만볼트!</div>
+    <div class="skill-pts" id="skillPts">+10점</div>
+  </div>
+</div>
+<div class="skill-flash" id="skillFlash"></div>
+
+<!-- 칭찬/경고 -->
+<div class="praise-pop" id="praise"><div class="pp-e" id="ppE">🎉</div><div class="pp-t" id="ppT">잘 했어요!</div></div>
+<div class="warn-pop" id="warn">✏️ 빈 칸을 써주세요!</div>
+
+<!-- 뱃지 획득 팝업 -->
+<div class="badge-popup" id="badgePopup">
+  <div class="bp-label">🎉 뱃지 획득!</div>
+  <div class="bp-icon" id="bpIcon">🏆</div>
+  <div class="bp-name" id="bpName">뱃지 이름</div>
+  <div class="bp-desc" id="bpDesc">설명</div>
+</div>
+
+<!-- 결과 -->
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-box">
+    <div class="rb-e">🏆</div>
+    <div class="rb-tt" id="rbTt">완성!</div>
+    <div class="rb-s" id="rbS">10마리를 모두 배웠어요!</div>
+    <div class="rb-sc" id="rbSc">+100점</div>
+    <div class="rb-badge" id="rbBadge"><div class="rb-badge-ico" id="rbBadgeIco">🏆</div><div class="rb-badge-txt" id="rbBadgeTxt">뱃지 획득!</div></div>
+    <div class="rb-grid" id="rbGrid"></div>
+    <div class="rb-btns">
+      <button class="rb-btn s" onclick="showMain()">🏠 홈</button>
+      <button class="rb-btn p" onclick="goToDex()">📖 도감</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// 데이터
+// ══════════════════════════════════════════════════
+const SERIES = [
+  { id:'electric',name:'전기 타입',icon:'⚡',color:'#FADF3A',skill:'10만볼트!',skillFx:'⚡💥⚡',
+    pokemon:[
+      {id:25,name:'피카츄',desc:'볼에 있는 전기 주머니에 전기를 모아요. 화가 나면 강한 번개를 내뿜어요.',evo:[{id:172,name:'피츄'},{id:25,name:'피카츄',cur:true},{id:26,name:'라이츄'}]},
+      {id:26,name:'라이츄',desc:'꼬리로 번개를 내보내 자신을 지켜요. 1만 볼트의 전기를 낼 수 있어요.',evo:[{id:172,name:'피츄'},{id:25,name:'피카츄'},{id:26,name:'라이츄',cur:true}]},
+      {id:135,name:'쥬피썬더',desc:'이브이가 진화한 전기 포켓몬이에요. 번개처럼 빠르게 달려요.',evo:[{id:133,name:'이브이'},{id:135,name:'쥬피썬더',cur:true}]},
+      {id:145,name:'썬더',desc:'전설의 포켓몬! 날갯짓만으로도 번개가 생겨요. 폭풍 속에 나타나요.',evo:[{id:145,name:'썬더',cur:true}]},
+      {id:172,name:'피츄',desc:'아직 전기를 잘 못 다뤄서 자기 전기에 본인이 깜짝 놀라기도 해요.',evo:[{id:172,name:'피츄',cur:true},{id:25,name:'피카츄'},{id:26,name:'라이츄'}]},
+      {id:181,name:'란타',desc:'뿔에서 전기 공을 만들어 어두운 밤에 등대처럼 빛내요.',evo:[{id:179,name:'메리프'},{id:180,name:'플러시'},{id:181,name:'란타',cur:true}]},
+      {id:243,name:'라이코',desc:'번개를 타고 달리는 전설의 전기 포켓몬이에요.',evo:[{id:243,name:'라이코',cur:true}]},
+      {id:403,name:'꼬지지',desc:'갈기에서 전기가 흘러요. 주위에 있으면 머리카락이 쭈뼛 서요.',evo:[{id:403,name:'꼬지지',cur:true},{id:404,name:'럭시오'},{id:405,name:'렉시아'}]},
+      {id:405,name:'렉시아',desc:'온몸에서 전기를 내뿜어요. 눈빛만으로 전기를 발사할 수 있어요.',evo:[{id:403,name:'꼬지지'},{id:404,name:'럭시오'},{id:405,name:'렉시아',cur:true}]},
+      {id:81,name:'코일',desc:'두 개의 자석을 회전시켜 전기를 만들어요.',evo:[{id:81,name:'코일',cur:true},{id:82,name:'레어코일'},{id:462,name:'자포코일'}]},
+    ]},
+  { id:'water',name:'물 타입',icon:'💧',color:'#5bcefa',skill:'파도타기!',skillFx:'🌊💧🌊',
+    pokemon:[
+      {id:7,name:'꼬부기',desc:'등껍질이 방어용 갑옷이에요. 적이 나타나면 껍질 속으로 쏙 들어가요.',evo:[{id:7,name:'꼬부기',cur:true},{id:8,name:'어니부기'},{id:9,name:'거북왕'}]},
+      {id:8,name:'어니부기',desc:'꼬부기가 진화했어요. 등껍질이 더 단단하고 물대포를 정확하게 쏠 수 있어요.',evo:[{id:7,name:'꼬부기'},{id:8,name:'어니부기',cur:true},{id:9,name:'거북왕'}]},
+      {id:9,name:'거북왕',desc:'강력한 물대포를 쏘는 거대한 거북 포켓몬이에요.',evo:[{id:7,name:'꼬부기'},{id:8,name:'어니부기'},{id:9,name:'거북왕',cur:true}]},
+      {id:54,name:'고라파덕',desc:'항상 머리가 아픈 오리 포켓몬이에요. 너무 아프면 강력한 사이킥을 써요.',evo:[{id:54,name:'고라파덕',cur:true},{id:55,name:'골덕'}]},
+      {id:60,name:'발챙이',desc:'배에 소용돌이 무늬가 있는 올챙이 포켓몬이에요.',evo:[{id:60,name:'발챙이',cur:true},{id:61,name:'슈륙챙이'},{id:62,name:'강챙이'}]},
+      {id:129,name:'잉어킹',desc:'힘도 없고 쓸모없어 보이지만, 진화하면 갸라도스가 돼요.',evo:[{id:129,name:'잉어킹',cur:true},{id:130,name:'갸라도스'}]},
+      {id:130,name:'갸라도스',desc:'화가 나면 마을 하나를 통째로 부숴버려요.',evo:[{id:129,name:'잉어킹'},{id:130,name:'갸라도스',cur:true}]},
+      {id:134,name:'샤워',desc:'이브이가 물의 돌로 진화한 모습이에요.',evo:[{id:133,name:'이브이'},{id:134,name:'샤워',cur:true}]},
+      {id:131,name:'라프라스',desc:'사람을 등에 태우고 바다를 헤엄쳐요. 노래 목소리가 아름다워요.',evo:[{id:131,name:'라프라스',cur:true}]},
+      {id:147,name:'미니룡',desc:'1만 년을 살아야 하늘을 날 수 있다는 전설이 있어요.',evo:[{id:147,name:'미니룡',cur:true},{id:148,name:'신뇽'},{id:149,name:'망나뇽'}]},
+    ]},
+  { id:'fire',name:'불꽃 타입',icon:'🔥',color:'#ff6b35',skill:'화염방사!',skillFx:'🔥💥🔥',
+    pokemon:[
+      {id:4,name:'파이리',desc:'꼬리 불꽃이 생명이에요. 꼬리 불꽃이 꺼지면 파이리도 사라져요.',evo:[{id:4,name:'파이리',cur:true},{id:5,name:'리자드'},{id:6,name:'리자몽'}]},
+      {id:5,name:'리자드',desc:'싸울수록 꼬리 불꽃이 강하게 타올라요.',evo:[{id:4,name:'파이리'},{id:5,name:'리자드',cur:true},{id:6,name:'리자몽'}]},
+      {id:6,name:'리자몽',desc:'3000도 불을 내뿜어요. 불꽃 날개로 하늘을 날아요.',evo:[{id:4,name:'파이리'},{id:5,name:'리자드'},{id:6,name:'리자몽',cur:true}]},
+      {id:37,name:'식스테일',desc:'여섯 개의 꼬리를 가진 불꽃 여우 포켓몬이에요.',evo:[{id:37,name:'식스테일',cur:true},{id:38,name:'나인테일'}]},
+      {id:58,name:'가디',desc:'항상 화가 나있는 강아지 포켓몬이에요.',evo:[{id:58,name:'가디',cur:true},{id:59,name:'윈디'}]},
+      {id:77,name:'포니타',desc:'온몸이 불꽃으로 덮인 말 포켓몬이에요.',evo:[{id:77,name:'포니타',cur:true},{id:78,name:'날쌘마'}]},
+      {id:126,name:'마그마',desc:'몸의 온도가 무려 1만 2천 도예요.',evo:[{id:240,name:'마그비'},{id:126,name:'마그마',cur:true},{id:467,name:'마그모타'}]},
+      {id:136,name:'부스터',desc:'이브이가 불꽃돌로 진화한 모습이에요. 체온이 900도나 돼요!',evo:[{id:133,name:'이브이'},{id:136,name:'부스터',cur:true}]},
+      {id:146,name:'파이어',desc:'전설의 불새 포켓몬이에요.',evo:[{id:146,name:'파이어',cur:true}]},
+      {id:78,name:'날쌘마',desc:'포니타가 진화했어요. 갈기의 불꽃을 스스로 조절해요.',evo:[{id:77,name:'포니타'},{id:78,name:'날쌘마',cur:true}]},
+    ]},
+  { id:'grass',name:'풀 타입',icon:'🌿',color:'#6fcf7a',skill:'솔라빔!',skillFx:'🌿☀️🌿',
+    pokemon:[
+      {id:1,name:'이상해씨',desc:'등에 씨앗이 달린 채로 태어나요.',evo:[{id:1,name:'이상해씨',cur:true},{id:2,name:'이상해풀'},{id:3,name:'이상해꽃'}]},
+      {id:2,name:'이상해풀',desc:'등의 씨앗이 싹을 틔워 꽃봉오리가 됐어요.',evo:[{id:1,name:'이상해씨'},{id:2,name:'이상해풀',cur:true},{id:3,name:'이상해꽃'}]},
+      {id:3,name:'이상해꽃',desc:'등의 꽃에서 향기로운 꿀 냄새가 나요.',evo:[{id:1,name:'이상해씨'},{id:2,name:'이상해풀'},{id:3,name:'이상해꽃',cur:true}]},
+      {id:43,name:'뚜벅쵸',desc:'독 가루를 뿌려 적을 물리쳐요.',evo:[{id:43,name:'뚜벅쵸',cur:true},{id:44,name:'냄새꼴'},{id:45,name:'라플레시아'}]},
+      {id:45,name:'라플레시아',desc:'꽃에서 강력한 독 꽃가루가 나와요.',evo:[{id:43,name:'뚜벅쵸'},{id:44,name:'냄새꼴'},{id:45,name:'라플레시아',cur:true}]},
+      {id:69,name:'모다피',desc:'포자를 퍼뜨려 번식하는 버섯 포켓몬이에요.',evo:[{id:69,name:'모다피',cur:true},{id:70,name:'우츠동'},{id:71,name:'우츠보트'}]},
+      {id:70,name:'우츠동',desc:'큰 꽃이 벌레를 잡아먹는 포켓몬이에요.',evo:[{id:69,name:'모다피'},{id:70,name:'우츠동',cur:true},{id:71,name:'우츠보트'}]},
+      {id:102,name:'아라리',desc:'여섯 개의 알이 모여서 하나의 포켓몬처럼 행동해요.',evo:[{id:102,name:'아라리',cur:true},{id:103,name:'나시'}]},
+      {id:114,name:'덩쿠리',desc:'덩굴이 매우 강해서 자동차도 들어올려요.',evo:[{id:114,name:'덩쿠리',cur:true},{id:465,name:'덩쿠림보'}]},
+      {id:103,name:'나시',desc:'야자수처럼 생긴 포켓몬이에요.',evo:[{id:102,name:'아라리'},{id:103,name:'나시',cur:true}]},
+    ]},
+  { id:'psychic',name:'에스퍼 타입',icon:'🔮',color:'#ff8fab',skill:'사이코키네시스!',skillFx:'🔮✨🔮',
+    pokemon:[
+      {id:63,name:'캐이시',desc:'항상 숟가락을 들고 있어요. 잠자면서 텔레포트를 해요.',evo:[{id:63,name:'캐이시',cur:true},{id:64,name:'윤겔라'},{id:65,name:'후딘'}]},
+      {id:64,name:'윤겔라',desc:'숟가락 두 개를 들고 강력한 염력을 써요.',evo:[{id:63,name:'캐이시'},{id:64,name:'윤겔라',cur:true},{id:65,name:'후딘'}]},
+      {id:65,name:'후딘',desc:'IQ가 5000이나 되는 초지능 포켓몬이에요.',evo:[{id:63,name:'캐이시'},{id:64,name:'윤겔라'},{id:65,name:'후딘',cur:true}]},
+      {id:79,name:'야돈',desc:'낚시를 즐기는 느긋한 포켓몬이에요. 꼬리가 물리면 10초 후에 아파요.',evo:[{id:79,name:'야돈',cur:true},{id:80,name:'야도란'}]},
+      {id:96,name:'슬리프',desc:'잠자는 포켓몬의 꿈을 먹고 사는 포켓몬이에요.',evo:[{id:96,name:'슬리프',cur:true},{id:97,name:'슬리퍼'}]},
+      {id:97,name:'슬리퍼',desc:'부채질로 강한 최면 효과를 내요.',evo:[{id:96,name:'슬리프'},{id:97,name:'슬리퍼',cur:true}]},
+      {id:121,name:'아쥬마',desc:'8개의 팔 끝에서 빛이 나와 적을 공격해요.',evo:[{id:120,name:'별가사리'},{id:121,name:'아쥬마',cur:true}]},
+      {id:122,name:'마임맨',desc:'온몸으로 보이지 않는 벽을 만들 수 있어요.',evo:[{id:439,name:'흉내내기'},{id:122,name:'마임맨',cur:true}]},
+      {id:124,name:'루주라',desc:'노래를 불러 상대를 잠들게 해요.',evo:[{id:238,name:'뽀뽀라'},{id:124,name:'루주라',cur:true}]},
+      {id:150,name:'뮤츠',desc:'유전자를 조작해 만들어진 전설의 포켓몬이에요.',evo:[{id:150,name:'뮤츠',cur:true}]},
+    ]},
+  { id:'dragon',name:'드래곤 타입',icon:'🐉',color:'#7b68ee',skill:'드래곤크루!',skillFx:'🐉💥🐉',
+    pokemon:[
+      {id:147,name:'미니룡',desc:'1만 년을 살아야 하늘을 날 수 있다는 전설이 있어요.',evo:[{id:147,name:'미니룡',cur:true},{id:148,name:'신뇽'},{id:149,name:'망나뇽'}]},
+      {id:148,name:'신뇽',desc:'몸이 반짝반짝 빛나고 수중에서도 날 수 있어요.',evo:[{id:147,name:'미니룡'},{id:148,name:'신뇽',cur:true},{id:149,name:'망나뇽'}]},
+      {id:149,name:'망나뇽',desc:'시속 260km로 날아요. 세계 어느 바다도 헤엄쳐 건널 수 있어요.',evo:[{id:147,name:'미니룡'},{id:148,name:'신뇽'},{id:149,name:'망나뇽',cur:true}]},
+      {id:116,name:'쏘드라',desc:'꼬리로 산호초나 해초를 꽉 붙잡고 자요.',evo:[{id:116,name:'쏘드라',cur:true},{id:117,name:'시드라'},{id:230,name:'킹드라'}]},
+      {id:117,name:'시드라',desc:'등의 가시에 독이 있어요.',evo:[{id:116,name:'쏘드라'},{id:117,name:'시드라',cur:true},{id:230,name:'킹드라'}]},
+      {id:230,name:'킹드라',desc:'킹드라가 하품하면 거대한 소용돌이가 생겨요.',evo:[{id:116,name:'쏘드라'},{id:117,name:'시드라'},{id:230,name:'킹드라',cur:true}]},
+      {id:246,name:'애버라스',desc:'바위를 먹으며 자라는 포켓몬이에요.',evo:[{id:246,name:'애버라스',cur:true},{id:247,name:'데기라스'},{id:248,name:'마기라스'}]},
+      {id:329,name:'비브라바',desc:'날개를 진동시켜 초음파를 내보내요.',evo:[{id:328,name:'톱치'},{id:329,name:'비브라바',cur:true},{id:330,name:'플라이곤'}]},
+      {id:330,name:'플라이곤',desc:'사막의 정령이라 불리며 모래바람을 일으켜요.',evo:[{id:328,name:'톱치'},{id:329,name:'비브라바'},{id:330,name:'플라이곤',cur:true}]},
+      {id:384,name:'레쿠쟈',desc:'오존층에 사는 전설의 드래곤이에요.',evo:[{id:384,name:'레쿠쟈',cur:true}]},
+    ]},
+  { id:'ice',name:'얼음 타입',icon:'🧊',color:'#a8e6f0',skill:'눈보라!',skillFx:'🧊❄️🧊',
+    pokemon:[
+      {id:87,name:'쥬레곤',desc:'차가운 바다에 사는 포켓몬이에요. 숨을 내쉬면 얼음이 만들어져요.',evo:[{id:86,name:'쥬쥬',cur:false},{id:87,name:'쥬레곤',cur:true}]},
+      {id:91,name:'파르셀',desc:'껍질을 뺏어 입고 다니는 포켓몬이에요. 몸이 얼음처럼 차가워요.',evo:[{id:90,name:'셀러'},{id:91,name:'파르셀',cur:true}]},
+      {id:124,name:'루주라',desc:'차가운 기운을 내뿜으며 노래로 상대를 잠들게 해요.',evo:[{id:238,name:'뽀뽀라'},{id:124,name:'루주라',cur:true}]},
+      {id:131,name:'라프라스',desc:'차가운 바다를 헤엄치는 포켓몬이에요. 등에 사람을 태우고 이동해요.',evo:[{id:131,name:'라프라스',cur:true}]},
+      {id:144,name:'프리져',desc:'전설의 얼음 새 포켓몬이에요. 날개짓으로 눈보라를 일으켜요.',evo:[{id:144,name:'프리져',cur:true}]},
+      {id:220,name:'꾸꾸리',desc:'눈 속에서 먹이를 찾는 포켓몬이에요.',evo:[{id:220,name:'꾸꾸리',cur:true},{id:221,name:'대코파스'}]},
+      {id:221,name:'대코파스',desc:'꾸꾸리가 진화했어요. 상아가 매우 단단해서 무엇이든 찔러요.',evo:[{id:220,name:'꾸꾸리'},{id:221,name:'대코파스',cur:true}]},
+      {id:238,name:'뽀뽀라',desc:'루주라의 아기 포켓몬이에요. 키스를 하면 상대가 잠들어요.',evo:[{id:238,name:'뽀뽀라',cur:true},{id:124,name:'루주라'}]},
+      {id:361,name:'눈꼬마',desc:'눈덩이처럼 생긴 포켓몬이에요. 눈보라를 일으켜 공격해요.',evo:[{id:361,name:'눈꼬마',cur:true},{id:362,name:'얼음귀신'}]},
+      {id:362,name:'얼음귀신',desc:'눈꼬마가 진화했어요. 몸 전체가 얼음으로 덮여 있어요.',evo:[{id:361,name:'눈꼬마'},{id:362,name:'얼음귀신',cur:true}]},
+    ]},
+  { id:'steel',name:'강철 타입',icon:'⚙️',color:'#b8c0cc',skill:'아이언테일!',skillFx:'⚙️💥⚙️',
+    pokemon:[
+      {id:81,name:'코일',desc:'자석으로 전기를 만들어요. 강철과 전기 두 가지 타입을 갖고 있어요.',evo:[{id:81,name:'코일',cur:true},{id:82,name:'레어코일'},{id:462,name:'자포코일'}]},
+      {id:82,name:'레어코일',desc:'코일 세 마리가 합체한 모습이에요. 강력한 자기력을 냅니다.',evo:[{id:81,name:'코일'},{id:82,name:'레어코일',cur:true},{id:462,name:'자포코일'}]},
+      {id:205,name:'단단지',desc:'단단한 껍질을 가진 강철 포켓몬이에요.',evo:[{id:204,name:'통통코'},{id:205,name:'단단지',cur:true}]},
+      {id:208,name:'강철톤',desc:'온달드가 진화한 강철 포켓몬이에요. 꼬리 끝이 아주 날카로워요.',evo:[{id:95,name:'온달드'},{id:208,name:'강철톤',cur:true}]},
+      {id:212,name:'핫삼',desc:'양쪽 집게가 엄청나게 강해요. 시속 90km로 날아요.',evo:[{id:123,name:'시저리아'},{id:212,name:'핫삼',cur:true}]},
+      {id:227,name:'에어암드',desc:'날개가 강철로 되어 있어요. 온몸이 철갑옷을 입은 것 같아요.',evo:[{id:227,name:'에어암드',cur:true}]},
+      {id:232,name:'거대코뿌리',desc:'코뿔소처럼 생긴 강철 포켓몬이에요. 엄청 무거워요.',evo:[{id:111,name:'뿔카노'},{id:112,name:'코뿌리'},{id:232,name:'거대코뿌리',cur:true}]},
+      {id:304,name:'단철이',desc:'온몸이 강철로 덮인 포켓몬이에요.',evo:[{id:304,name:'단철이',cur:true},{id:305,name:'강철무장'},{id:306,name:'보스로라'}]},
+      {id:306,name:'보스로라',desc:'단철이의 최종 진화예요. 몸이 아주 단단해서 폭발에도 끄떡없어요.',evo:[{id:304,name:'단철이'},{id:305,name:'강철무장'},{id:306,name:'보스로라',cur:true}]},
+      {id:376,name:'메타그로스',desc:'초고지능 강철 포켓몬이에요. 사이킥 능력도 갖고 있어요.',evo:[{id:374,name:'동미러'},{id:375,name:'메타당'},{id:376,name:'메타그로스',cur:true}]},
+    ]},
+  { id:'fairy',name:'페어리 타입',icon:'🧚',color:'#f4a7cb',skill:'문포스!',skillFx:'🧚✨🧚',
+    pokemon:[
+      {id:35,name:'삐삐',desc:'달 빛을 받으면 노래를 부르는 포켓몬이에요. 목소리가 아주 예뻐요.',evo:[{id:35,name:'삐삐',cur:true},{id:36,name:'픽시'}]},
+      {id:36,name:'픽시',desc:'삐삐가 진화한 모습이에요. 날개로 하늘을 날 수 있어요.',evo:[{id:35,name:'삐삐'},{id:36,name:'픽시',cur:true}]},
+      {id:39,name:'푸린',desc:'노래로 상대를 재우는 포켓몬이에요. 눈이 크고 귀여워요.',evo:[{id:39,name:'푸린',cur:true},{id:40,name:'푸크린'}]},
+      {id:40,name:'푸크린',desc:'푸린이 진화했어요. 더 크고 더 귀여워졌어요.',evo:[{id:39,name:'푸린'},{id:40,name:'푸크린',cur:true}]},
+      {id:122,name:'마임맨',desc:'페어리와 에스퍼 두 가지 타입을 갖고 있어요.',evo:[{id:439,name:'흉내내기'},{id:122,name:'마임맨',cur:true}]},
+      {id:173,name:'삐',desc:'삐삐의 아기 포켓몬이에요. 아주 귀엽고 작아요.',evo:[{id:173,name:'삐',cur:true},{id:35,name:'삐삐'},{id:36,name:'픽시'}]},
+      {id:174,name:'마릴리',desc:'동그랗고 파란 포켓몬이에요. 물과 페어리 두 타입이에요.',evo:[{id:183,name:'마릴'},{id:184,name:'마릴리',cur:true}]},
+      {id:175,name:'토게피',desc:'행복을 나눠주는 포켓몬이에요. 알 껍질을 몸에 달고 있어요.',evo:[{id:175,name:'토게피',cur:true},{id:176,name:'토게틱'},{id:468,name:'토게키스'}]},
+      {id:176,name:'토게틱',desc:'행복한 사람들에게만 나타나는 포켓몬이에요.',evo:[{id:175,name:'토게피'},{id:176,name:'토게틱',cur:true},{id:468,name:'토게키스'}]},
+      {id:183,name:'마릴',desc:'물속에서 사는 동그란 쥐 포켓몬이에요.',evo:[{id:183,name:'마릴',cur:true},{id:184,name:'마릴리'}]},
+    ]},
+  { id:'ghost',name:'고스트 타입',icon:'👻',color:'#a78bfa',skill:'나이트헤드!',skillFx:'👻💜👻',
+    pokemon:[
+      {id:92,name:'고우스트',desc:'유령 포켓몬이에요. 어두운 곳에 자주 나타나고 벽을 통과할 수 있어요.',evo:[{id:92,name:'고우스트',cur:true},{id:93,name:'고오스트'},{id:94,name:'팬텀'}]},
+      {id:93,name:'고오스트',desc:'고우스트가 진화했어요. 더 강력한 유령 능력을 갖고 있어요.',evo:[{id:92,name:'고우스트'},{id:93,name:'고오스트',cur:true},{id:94,name:'팬텀'}]},
+      {id:94,name:'팬텀',desc:'가장 강력한 고스트 포켓몬이에요. 어떤 공격도 받지 않는다고 해요.',evo:[{id:92,name:'고우스트'},{id:93,name:'고오스트'},{id:94,name:'팬텀',cur:true}]},
+      {id:200,name:'무우마',desc:'꿈을 먹는 유령 포켓몬이에요. 슬픈 울음소리를 내요.',evo:[{id:200,name:'무우마',cur:true},{id:429,name:'무우마직'}]},
+      {id:292,name:'껍질몬',desc:'탈피한 뒤 빈 껍질에 영혼이 깃든 포켓몬이에요. HP가 항상 1이에요.',evo:[{id:290,name:'토중몬'},{id:291,name:'노젠다'},{id:292,name:'껍질몬',cur:true}]},
+      {id:302,name:'깜놀새미',desc:'눈에서 주술 빔을 쏘는 유령 포켓몬이에요.',evo:[{id:302,name:'깜놀새미',cur:true},{id:354,name:'다부팬텀'}]},
+      {id:354,name:'다부팬텀',desc:'깜놀새미가 진화했어요. 저주의 힘이 훨씬 강해졌어요.',evo:[{id:302,name:'깜놀새미'},{id:354,name:'다부팬텀',cur:true}]},
+      {id:355,name:'해골몽',desc:'사람의 두개골에 사는 유령 포켓몬이에요.',evo:[{id:355,name:'해골몽',cur:true},{id:356,name:'둘레스'}]},
+      {id:356,name:'둘레스',desc:'해골몽이 진화했어요. 저주를 거는 무시무시한 포켓몬이에요.',evo:[{id:355,name:'해골몽'},{id:356,name:'둘레스',cur:true}]},
+      {id:358,name:'치렁',desc:'종처럼 생긴 포켓몬이에요. 울리면 이상한 일이 생겨요.',evo:[{id:358,name:'치렁',cur:true}]},
+    ]},
+  { id:'dark',name:'악 타입',icon:'😈',color:'#818cf8',skill:'악의파동!',skillFx:'😈💀😈',
+    pokemon:[
+      {id:197,name:'블래키',desc:'이브이가 진화한 악 타입이에요. 밤에 빛나는 고리 무늬가 있어요.',evo:[{id:133,name:'이브이'},{id:197,name:'블래키',cur:true}]},
+      {id:198,name:'니로우',desc:'어두운 밤에 반짝이는 것들을 모으는 포켓몬이에요.',evo:[{id:198,name:'니로우',cur:true},{id:430,name:'돈크로우'}]},
+      {id:215,name:'포푸니',desc:'낫처럼 생긴 발톱으로 먹이를 잡아요.',evo:[{id:215,name:'포푸니',cur:true},{id:461,name:'위잉구'}]},
+      {id:228,name:'헬가',desc:'뼈가 있는 곳에 나타나는 포켓몬이에요.',evo:[{id:228,name:'헬가',cur:true},{id:229,name:'헬가이저'}]},
+      {id:229,name:'헬가이저',desc:'헬가가 진화했어요. 불꽃과 악 두 가지 타입이에요.',evo:[{id:228,name:'헬가'},{id:229,name:'헬가이저',cur:true}]},
+      {id:246,name:'애버라스',desc:'바위를 먹으며 자라는 포켓몬이에요. 악과 바위 두 타입이에요.',evo:[{id:246,name:'애버라스',cur:true},{id:247,name:'데기라스'},{id:248,name:'마기라스'}]},
+      {id:248,name:'마기라스',desc:'애버라스의 최종 진화예요. 엄청나게 강력한 포켓몬이에요.',evo:[{id:246,name:'애버라스'},{id:247,name:'데기라스'},{id:248,name:'마기라스',cur:true}]},
+      {id:261,name:'포챠나',desc:'작지만 사나운 악 타입 포켓몬이에요.',evo:[{id:261,name:'포챠나',cur:true},{id:262,name:'그라에나'}]},
+      {id:262,name:'그라에나',desc:'포챠나가 진화했어요. 무리를 지어 사냥해요.',evo:[{id:261,name:'포챠나'},{id:262,name:'그라에나',cur:true}]},
+      {id:359,name:'앱솔',desc:'재앙을 예지하는 포켓몬이에요. 나타나면 사고가 생긴다고 해요.',evo:[{id:359,name:'앱솔',cur:true}]},
+    ]},
+];
+
+// 뱃지 정의
+const BADGES = SERIES.map(s=>({
+  id: s.id,
+  icon: s.icon,
+  name: `${s.name} 마스터`,
+  desc: `${s.name} 포켓몬 10마리 완성!`,
+  color: s.color
+})).concat([
+  {id:'all50',icon:'🌟',name:'반백 수집가',desc:'50마리 이상 수집!',color:'#FFD700'},
+  {id:'all110',icon:'👑',name:'포켓몬 박사',desc:'모든 110마리 수집!',color:'#FFD700'},
+  {id:'first',icon:'🎯',name:'첫 발걸음',desc:'처음으로 포켓몬 이름을 썼어요!',color:'#2ec4b6'},
+]);
+
+// ══════════════════════════════
+// 상태
+// ══════════════════════════════
+let store = JSON.parse(localStorage.getItem('pkHv4')||'{}');
+let totalScore = parseInt(localStorage.getItem('pkSv4')||'0');
+let curSeries=null, curIdx=0, canvases=[], penSize=8, guideOn=false, curPokeId=25;
+
+function save(){localStorage.setItem('pkHv4',JSON.stringify(store));localStorage.setItem('pkSv4',String(totalScore));}
+function k(sid,i){return `${sid}_${i}`;}
+function isDone(sid,i){return !!store[k(sid,i)]?.done;}
+function progress(sid){return SERIES.find(s=>s.id===sid).pokemon.filter((_,i)=>isDone(sid,i)).length;}
+function totalDone(){return SERIES.reduce((a,s)=>a+progress(s.id),0);}
+
+// ══════════════════════════════
+// 화면 전환
+// ══════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function showMain(){buildMain();showScreen('mainScreen');}
+function showDex(sid){buildDex(sid);showScreen('dexScreen');}
+function goToDex(){document.getElementById('resultOverlay').classList.remove('show');showDex(curSeries.id);}
+
+// ══════════════════════════════
+// 메인 화면
+// ══════════════════════════════
+function buildMain(){
+  document.getElementById('totalScoreDisp').textContent=totalScore;
+  const done=totalDone(), total=SERIES.reduce((a,s)=>a+s.pokemon.length,0);
+  document.getElementById('totalPbar').style.width=`${(done/total)*100}%`;
+  document.getElementById('totalPct').textContent=`전체 ${done} / ${total}마리 수집`;
+  const grid=document.getElementById('seriesGrid');
+  grid.innerHTML='';
+  SERIES.forEach(s=>{
+    const d=progress(s.id), t=s.pokemon.length, pct=(d/t)*100;
+    const earned=d===t;
+    const c=document.createElement('div');
+    c.className='s-card'; c.setAttribute('data-icon',s.icon);
+    c.style.borderColor=earned?s.color+'99':pct>0?s.color+'44':'';
+    c.innerHTML=`<span class="s-icon">${s.icon}</span>
+      <div class="s-name" style="color:${s.color}">${s.name}</div>
+      <div class="s-sub">${t}마리</div>
+      <div class="s-bar-wrap"><div class="s-bar" style="width:${pct}%;background:${s.color}"></div></div>
+      <div class="s-count">${d}/${t}</div>
+      <div class="badge-row">${earned?'<span class="s-badge">🏆</span>':''}</div>`;
+    c.onclick=()=>showLearn(s.id);
+    grid.appendChild(c);
+  });
+}
+
+// ══════════════════════════════
+// 도감
+// ══════════════════════════════
+function buildDex(sid){
+  document.getElementById('dexTitle').textContent=sid?`${SERIES.find(s=>s.id===sid).icon} 도감`:'📖 전체 도감';
+  const grid=document.getElementById('dexGrid'); grid.innerHTML='';
+  SERIES.forEach(s=>{
+    if(sid&&s.id!==sid)return;
+    s.pokemon.forEach((p,i)=>{
+      const done=isDone(s.id,i);
+      const el=document.createElement('div');
+      el.className=`dex-item${done?' done':''}`;
+      el.innerHTML=`<div class="dex-num">#${String(p.id).padStart(3,'0')}</div>
+        <img class="dex-img${done?'':' shadow'}" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png" alt="">
+        <div class="dex-name">${done?p.name:'???'}</div>`;
+      grid.appendChild(el);
+    });
+  });
+}
+
+// ══════════════════════════════
+// 카드 화면
+// ══════════════════════════════
+function buildCards(){
+  const grid=document.getElementById('cardGrid'); grid.innerHTML='';
+  let any=false;
+  SERIES.forEach(s=>{
+    s.pokemon.forEach((p,i)=>{
+      const entry=store[k(s.id,i)];
+      if(!entry?.done)return;
+      any=true;
+      const card=document.createElement('div');
+      card.className='poke-card';
+      card.style.borderColor=s.color+'55';
+      const cvHtml=(entry.urls||[]).map(u=>`<div class="card-cv"><img src="${u}" style="width:46px;height:46px;object-fit:contain;display:block"></div>`).join('');
+      card.innerHTML=`<div class="card-top" style="background:linear-gradient(135deg,${s.color}11,transparent)">
+        <img class="card-poke-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.id}.png" alt="">
+        <div class="card-name" style="color:${s.color}">${p.name}</div>
+        <div class="card-num">#${String(p.id).padStart(3,'0')}</div>
+        <div class="card-type-badge" style="background:${s.color}22;color:${s.color};border:1px solid ${s.color}44">${s.icon} ${s.name.replace(' 타입','')}</div>
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-writings">${cvHtml||'<div class="card-empty">글씨를 써봐요!</div>'}</div>`;
+      grid.appendChild(card);
+    });
+  });
+  if(!any) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--gray)"><div style="font-size:3rem;margin-bottom:10px">📇</div><div style="font-family:Jua,sans-serif;font-size:1rem">아직 카드가 없어요!<br>포켓몬 이름을 쓰면 카드가 만들어져요 😊</div></div>';
+}
+
+// ══════════════════════════════
+// 글씨 모음
+// ══════════════════════════════
+function buildSheet(){
+  const grid=document.getElementById('sheetGrid'); grid.innerHTML='';
+  let any=false;
+  SERIES.forEach(s=>{
+    s.pokemon.forEach((p,i)=>{
+      const entry=store[k(s.id,i)];
+      if(!entry?.done)return;
+      any=true;
+      const card=document.createElement('div');
+      card.className='sh-card';
+      const cvHtml=(entry.urls||[]).map(u=>`<div class="sh-cv"><img src="${u}" style="width:48px;height:48px;object-fit:contain;display:block"></div>`).join('');
+      card.innerHTML=`<img class="sh-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png" alt="">
+        <div class="sh-name">${p.name}</div>
+        <div class="sh-cvs">${cvHtml}</div>`;
+      grid.appendChild(card);
+    });
+  });
+  if(!any) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--gray)"><div style="font-size:3rem;margin-bottom:10px">✏️</div><div style="font-family:Jua,sans-serif;font-size:1rem">아직 쓴 글씨가 없어요!<br>포켓몬 이름을 써보러 가요 😊</div></div>';
+}
+
+// ══════════════════════════════
+// 뱃지
+// ══════════════════════════════
+function buildBadges(){
+  const grid=document.getElementById('badgeGrid'); grid.innerHTML='';
+  BADGES.forEach(b=>{
+    const earned=checkBadge(b.id);
+    const el=document.createElement('div');
+    el.className=`badge-item${earned?' earned':''}`;
+    el.innerHTML=`<span class="badge-icon">${b.icon}</span>
+      <div class="badge-name">${b.name}</div>
+      <div class="badge-desc">${b.desc}</div>
+      ${earned?`<div class="badge-earned-lbl">✅ 획득!</div>`:''}`;
+    grid.appendChild(el);
+  });
+}
+
+function checkBadge(id){
+  const s=SERIES.find(s=>s.id===id);
+  if(s) return progress(id)===s.pokemon.length;
+  if(id==='all50') return totalDone()>=50;
+  if(id==='all110') return totalDone()>=110;
+  if(id==='first') return totalDone()>=1;
+  return false;
+}
+
+function checkNewBadges(prevDone, seriesId){
+  const newBadges=[];
+  if(prevDone===0&&totalDone()>=1) newBadges.push(BADGES.find(b=>b.id==='first'));
+  const s=SERIES.find(s=>s.id===seriesId);
+  if(s&&progress(seriesId)===s.pokemon.length) newBadges.push(BADGES.find(b=>b.id===seriesId));
+  if(prevDone<50&&totalDone()>=50) newBadges.push(BADGES.find(b=>b.id==='all50'));
+  if(prevDone<110&&totalDone()>=110) newBadges.push(BADGES.find(b=>b.id==='all110'));
+  return newBadges.filter(Boolean);
+}
+
+function showBadgePopup(badge, cb){
+  const el=document.getElementById('badgePopup');
+  document.getElementById('bpIcon').textContent=badge.icon;
+  document.getElementById('bpName').textContent=badge.name;
+  document.getElementById('bpDesc').textContent=badge.desc;
+  el.classList.add('show');
+  setTimeout(()=>{el.classList.remove('show');if(cb)setTimeout(cb,300);},2200);
+}
+
+// ══════════════════════════════
+// 학습 화면
+// ══════════════════════════════
+function showLearn(sid){
+  curSeries=SERIES.find(s=>s.id===sid); curIdx=0;
+  document.getElementById('learnTitle').textContent=`${curSeries.icon} ${curSeries.name}`;
+  document.getElementById('scoreDisp').textContent=totalScore;
+  loadPoke(0); showScreen('learnScreen');
+}
+
+function loadPoke(idx){
+  curIdx=idx;
+  const s=curSeries, p=s.pokemon[idx];
+  curPokeId=p.id;
+  // 색상
+  document.getElementById('imgRing').style.setProperty('--tc',s.color);
+  document.getElementById('typeTag').textContent=`${s.icon} ${s.name.replace(' 타입','')}`;
+  document.getElementById('typeTag').style.cssText=`background:${s.color}22;color:${s.color};border:1px solid ${s.color}44;font-size:.7rem;font-weight:800;padding:3px 14px;border-radius:20px;letter-spacing:1px;margin-bottom:12px`;
+  document.getElementById('pokeHero').setAttribute('data-bg',s.icon);
+  document.getElementById('pokeName').textContent=p.name;
+  document.getElementById('pokeName').style.color=s.color;
+  document.getElementById('pokeNum').textContent=`#${String(p.id).padStart(3,'0')}`;
+  document.getElementById('pokeDesc').textContent=p.desc;
+  // 이미지
+  const lo=document.getElementById('loadIco'), im=document.getElementById('pokeImg');
+  lo.textContent=s.icon; lo.style.display='flex'; im.style.display='none';
+  im.src=`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.id}.png`;
+  im.onload=()=>{lo.style.display='none';im.style.display='block';};
+  // 진화/글씨
+  buildEvo(p.evo,s.color);
+  buildHUD();
+  buildWriting(p.name,s.color);
+  guideOn=false;
+  document.getElementById('guideToggle').textContent='점선 가이드 OFF';
+  document.getElementById('guideToggle').classList.remove('on');
+  const card=document.getElementById('learnCard');
+  card.style.animation='none'; void card.offsetWidth; card.style.animation='cardIn .3s ease';
+}
+
+function buildEvo(evo,color){
+  const el=document.getElementById('evoChain'); el.innerHTML='';
+  if(!evo||evo.length<=1){el.innerHTML='<span style="color:var(--gray);font-size:.78rem">진화하지 않아요 ✨</span>';return;}
+  evo.forEach((e,i)=>{
+    if(i>0){const a=document.createElement('div');a.className='evo-arr';a.textContent='→';el.appendChild(a);}
+    const m=document.createElement('div'); m.className='evo-mon';
+    const img=document.createElement('img'); img.className='evo-img';
+    img.src=`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${e.id}.png`; img.alt=e.name;
+    const nm=document.createElement('div'); nm.className=`evo-name${e.cur?' evo-cur':''}`;
+    if(e.cur)nm.style.color=color; nm.textContent=e.name;
+    const lb=document.createElement('div'); lb.className='evo-lbl'; lb.textContent=e.cur?'◀ 지금':'';
+    m.appendChild(img); m.appendChild(nm); m.appendChild(lb); el.appendChild(m);
+  });
+}
+
+function buildHUD(){
+  const el=document.getElementById('hudDots'); el.innerHTML='';
+  curSeries.pokemon.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className=`hud-dot${i===curIdx?' cur':isDone(curSeries.id,i)?' done':''}`;
+    d.textContent=isDone(curSeries.id,i)?'✓':'';
+    el.appendChild(d);
+  });
+}
+
+// ══════════════════════════════
+// 글씨 쓰기
+// ══════════════════════════════
+function buildWriting(name,color){
+  const area=document.getElementById('writingArea'); area.innerHTML=''; canvases=[];
+  const chars=name.split('');
+  const avail=Math.min(window.innerWidth,612)-80;
+  const SIZE=Math.min(86,Math.floor(avail/chars.length)-12);
+  chars.forEach(ch=>{
+    const box=document.createElement('div'); box.className='char-box';
+    const g=document.createElement('div'); g.className='guide-ch'; g.textContent=ch; g.style.color=color;
+    const wrap=document.createElement('div'); wrap.className='cv-wrap';
+    wrap.style.width=SIZE+'px'; wrap.style.height=SIZE+'px'; wrap.style.borderColor=color+'44';
+    // SVG 격자
+    const ns='http://www.w3.org/2000/svg', svg=document.createElementNS(ns,'svg');
+    svg.setAttribute('width',SIZE); svg.setAttribute('height',SIZE);
+    svg.style.cssText='position:absolute;inset:0;z-index:1;pointer-events:none';
+    const step=SIZE/4;
+    for(let j=1;j<4;j++){
+      [[0,j*step,SIZE,j*step],[j*step,0,j*step,SIZE]].forEach(([x1,y1,x2,y2])=>{
+        const l=document.createElementNS(ns,'line');
+        l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);
+        l.setAttribute('stroke','rgba(160,160,160,0.25)');l.setAttribute('stroke-width','0.8');svg.appendChild(l);
+      });
+    }
+    [[0,0,SIZE,SIZE],[SIZE,0,0,SIZE]].forEach(([x1,y1,x2,y2])=>{
+      const l=document.createElementNS(ns,'line');
+      l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);
+      l.setAttribute('stroke','rgba(255,80,80,0.15)');l.setAttribute('stroke-width','0.8');svg.appendChild(l);
+    });
+    // 점선 가이드 레이어
+    const gl=document.createElement('div'); gl.className='cv-guide-layer'; gl.style.display='none';
+    gl.innerHTML=`<svg width="${SIZE}" height="${SIZE}" style="position:absolute;inset:0;pointer-events:none;z-index:2">
+      <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle"
+        font-family="Jua,sans-serif" font-size="${SIZE*0.65}" fill="rgba(0,0,0,0.08)"
+        stroke="rgba(0,0,0,0.06)" stroke-width="1" stroke-dasharray="4,3">${ch}</text>
+    </svg>`;
+    const cv=document.createElement('canvas'); cv.width=SIZE; cv.height=SIZE;
+    cv.style.cssText='display:block;touch-action:none;position:relative;z-index:3';
+    setupCv(cv,wrap);
+    canvases.push({cv,gl});
+    const clr=document.createElement('button'); clr.className='clr-ch'; clr.textContent='지우기';
+    clr.onclick=()=>cv.getContext('2d').clearRect(0,0,cv.width,cv.height);
+    wrap.appendChild(svg); wrap.appendChild(gl); wrap.appendChild(cv);
+    box.appendChild(g); box.appendChild(wrap); box.appendChild(clr);
+    area.appendChild(box);
+  });
+}
+
+function toggleGuide(){
+  guideOn=!guideOn;
+  const btn=document.getElementById('guideToggle');
+  btn.textContent=`점선 가이드 ${guideOn?'ON':'OFF'}`;
+  btn.classList.toggle('on',guideOn);
+  canvases.forEach(({gl})=>{ gl.style.display=guideOn?'block':'none'; });
+}
+
+function setupCv(cv,wrap){
+  const ctx=cv.getContext('2d');
+  let drawing=false,lx,ly;
+  function pos(e){
+    const r=cv.getBoundingClientRect(),sx=cv.width/r.width,sy=cv.height/r.height;
+    const src=e.touches?e.touches[0]:e;
+    return[(src.clientX-r.left)*sx,(src.clientY-r.top)*sy];
+  }
+  function start(e){e.preventDefault();drawing=true;wrap.classList.add('active');[lx,ly]=pos(e);ctx.beginPath();ctx.arc(lx,ly,penSize/2,0,Math.PI*2);ctx.fillStyle='#111';ctx.fill();}
+  function move(e){e.preventDefault();if(!drawing)return;const[x,y]=pos(e);ctx.strokeStyle='#111';ctx.lineWidth=penSize;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(x,y);ctx.stroke();[lx,ly]=[x,y];}
+  function end(e){e.preventDefault();drawing=false;wrap.classList.remove('active');}
+  cv.addEventListener('mousedown',start);cv.addEventListener('mousemove',move);cv.addEventListener('mouseup',end);cv.addEventListener('mouseleave',end);
+  cv.addEventListener('touchstart',start,{passive:false});cv.addEventListener('touchmove',move,{passive:false});cv.addEventListener('touchend',end,{passive:false});
+}
+
+function setPen(size,btn){penSize=size;document.querySelectorAll('.pb').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+function clearAll(){canvases.forEach(({cv})=>cv.getContext('2d').clearRect(0,0,cv.width,cv.height));}
+function hasDrawing(cv){
+  const d=cv.getContext('2d').getImageData(0,0,cv.width,cv.height).data;
+  for(let i=3;i<d.length;i+=4)if(d[i]>10)return true;
+  return false;
+}
+
+// ══════════════════════════════
+// 울음소리
+// ══════════════════════════════
+function playCry(){
+  try{
+    const audio=new Audio(`https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${curPokeId}.ogg`);
+    audio.volume=0.6; audio.play().catch(()=>{});
+  }catch(e){}
+}
+
+// ══════════════════════════════
+// 완료 처리
+// ══════════════════════════════
+function markDone(){
+  const empty=canvases.filter(({cv})=>!hasDrawing(cv));
+  if(empty.length>0){
+    showWarn(`✏️ ${empty.length}칸을 아직 안 썼어요!`);
+    canvases.forEach(({cv})=>{
+      if(!hasDrawing(cv)){
+        const w=cv.parentElement;
+        w.style.borderColor='#e63946';w.style.boxShadow='0 0 10px rgba(230,57,70,.4)';
+        setTimeout(()=>{w.style.borderColor='';w.style.boxShadow='';},1600);
+      }
+    });
+    return;
+  }
+  const prevDone=totalDone();
+  const entry={done:true,urls:canvases.map(({cv})=>cv.toDataURL('image/png'))};
+  store[k(curSeries.id,curIdx)]=entry;
+  totalScore+=10;
+  document.getElementById('scoreDisp').textContent=totalScore;
+  save();
+  // 기술 애니메이션
+  showSkillAnim(curSeries);
+  // 뱃지 체크
+  const newBadges=checkNewBadges(prevDone,curSeries.id);
+  let delay=1400;
+  if(newBadges.length>0){
+    setTimeout(()=>{
+      let i=0;
+      function showNext(){
+        if(i>=newBadges.length){proceed();return;}
+        showBadgePopup(newBadges[i++],showNext);
+      }
+      showNext();
+    },delay);
+  } else {
+    setTimeout(()=>proceed(),delay);
+  }
+}
+
+function proceed(){
+  if(curIdx+1>=curSeries.pokemon.length) showResult();
+  else loadPoke(curIdx+1);
+}
+
+// ══════════════════════════════
+// 기술 애니메이션
+// ══════════════════════════════
+function showSkillAnim(s){
+  const overlay=document.getElementById('skillOverlay');
+  const anim=document.getElementById('skillAnim');
+  const flash=document.getElementById('skillFlash');
+  document.getElementById('skillEmoji').textContent=s.skillFx;
+  document.getElementById('skillName').textContent=s.skill;
+  document.getElementById('skillPts').textContent='+10점!';
+  flash.style.background=s.color+'33';
+  flash.classList.add('show');
+  anim.classList.add('show');
+  setTimeout(()=>{flash.classList.remove('show');anim.classList.remove('show');},1300);
+}
+
+// ══════════════════════════════
+// 결과
+// ══════════════════════════════
+function showResult(){
+  const s=curSeries;
+  document.getElementById('rbTt').textContent=`${s.icon} ${s.name} 완성!`;
+  document.getElementById('rbS').textContent=`${s.pokemon.length}마리를 모두 배웠어요!`;
+  document.getElementById('rbSc').textContent=`+${s.pokemon.length*10}점`;
+  const earned=progress(s.id)===s.pokemon.length;
+  if(earned){
+    document.getElementById('rbBadge').classList.add('show');
+    document.getElementById('rbBadgeIco').textContent=s.icon;
+    document.getElementById('rbBadgeTxt').textContent=`${s.name} 마스터 뱃지 획득!`;
+  } else {
+    document.getElementById('rbBadge').classList.remove('show');
+  }
+  const grid=document.getElementById('rbGrid'); grid.innerHTML='';
+  s.pokemon.forEach(p=>{
+    const d=document.createElement('div'); d.className='rb-item';
+    d.innerHTML=`<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png" alt=""><div>${p.name}</div>`;
+    grid.appendChild(d);
+  });
+  document.getElementById('resultOverlay').classList.add('show');
+}
+
+// ══════════════════════════════
+// 유틸
+// ══════════════════════════════
+let wT;
+function showWarn(msg){const el=document.getElementById('warn');el.textContent=msg;el.classList.add('show');clearTimeout(wT);wT=setTimeout(()=>el.classList.remove('show'),2000);}
+function showPraise(e,t){const el=document.getElementById('praise');document.getElementById('ppE').textContent=e;document.getElementById('ppT').textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1000);}
+
+buildMain();
+</script>
+</body>
+</html>
